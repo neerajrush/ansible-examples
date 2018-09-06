@@ -1,0 +1,5 @@
+---
+# defaults file for lb
+
+kubernetes_flavor: openshift
+docker_registry_path: "{{ local_docker_registry | default('docker.io') }}"

@@ -1,0 +1,30 @@
+---
+# tasks file for lb
+- name: "installing VIM"
+  yum: pkg=vim state=installed
+
+- name: "installing tcpdump"
+  yum: pkg=tcpdump state=installed
+
+- name: "installing multiple softwares"
+  yum: pkg={{ item }} state=installed
+  with_items:
+  - vim
+  - ntp
+  - tcpdump
+  - at
+
+- name: ECHO configuted docker registory in inventory file
+  shell: "echo --docker-registry={{ docker_registry_path }}"
+  register: result
+
+- name: Look-up OpenShift projects
+  shell: "oc login -u system -p admin --insecure-skip-tls-verify https://cmt-devtest-cluster.cmtlab-dns.com:8443/;oc get projects"
+  when: kubernetes_flavor == "openshift"
+  register: result
+
+- name: Look-up OpenShift smart-origin project
+  shell: "oc login -u system -p admin --insecure-skip-tls-verify https://cmt-devtest-cluster.cmtlab-dns.com:8443/;oc get projects --namespace={{ namespace }}"
+  when: kubernetes_flavor == "openshift"
+  register: result
+
