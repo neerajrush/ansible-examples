@@ -1,4 +1,4 @@
-[root@test-server ansible-test]# ansible -i hosts --key-file=sshkeys/ivp-server -m shell -a "date;hostname" -u root all
+[root@test-server ansible-test]# ansible -i hosts --key-file=sshkeys/test-server -m shell -a "date;hostname" -u root all
 test-server2 | SUCCESS | rc=0 >>
 Sat Jun 23 19:25:19 UTC 2018
 test-server2
@@ -69,6 +69,7 @@ test-server2
 test-server3
 
 # ansible-playbook -i hosts playbook.yaml 
+# ansible-playbook -v -i hosts.yml --key-file=sshkeys/test-server playbook.yaml 
 
 
 cat lb/tasks/main.yml
