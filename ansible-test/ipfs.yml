@@ -5,25 +5,25 @@
   register: command_result
   changed_when: "'\" labeled' in command_result.stdout"
 
-- name: add-scc-to-use ipfailover
+- name: add-scc-to-use ipfs
   command: "{{ item }}"
   with_items:        
-  - oc adm policy add-scc-to-user hostnetwork -z ipfailover
-  - oc adm policy add-scc-to-user privileged -z ipfailover
-  - oc policy add-role-to-user system:replication-controller system:serviceaccount:ipfailover:deployer
+  - oc adm policy add-scc-to-user hostnetwork -z ipfs
+  - oc adm policy add-scc-to-user privileged -z ipfs
+  - oc policy add-role-to-user cluster-reader system:serviceaccount:ipfs:ipfs-sa
 
 - name: Create routers
-  command: oc adm router router-{{ item.5 }} --replicas={{ item.1 }} --selector={{ item.3 }} --labels={{ item.3 }} --service-account=ipfailover
+  command: oc adm router router-{{ item.5 }} --replicas={{ item.1 }} --selector={{ item.3 }} --labels={{ item.3 }} --service-account=ipfs-sa
   with_items:        
   - "{{ ipfs }}"
 
 - name: add-scc-to-use {{ item.5 }} service acc
-  command: oc adm policy add-scc-to-user privileged system:serviceaccount:ipfailover:router-{{ item.5 }} 
+  command: oc adm policy add-scc-to-user privileged system:serviceaccount:ipfs-sa:router-{{ item.5 }} 
   with_items:
   - "{{ ipfs }}"
 
-- name: IpfailOver
-  command: oc adm ipfailover ipf-{{ item.5 }} --replicas={{ item.1 }}  --selector={{ item.3 }}  --images=openshift/origin-keepalived-ipfailover:"{{ openshift_image_tag }}" --virtual-ips={{ item.2 }} --watch-port={{ item.4 }} --service-account=ipfailover --vrrp-id-offset="{{ item.6 }}" --interface="{{ item.7 }}"
+- name: Ipfs
+  command: oc adm ipfailover ipf-{{ item.5 }} --replicas={{ item.1 }}  --selector={{ item.3 }}  --images=keepalived:"{{ openshift_image_tag }}" --virtual-ips={{ item.2 }} --watch-port={{ item.4 }} --service-account=ipfs-sa --vrrp-id-offset="{{ item.6 }}" --interface="{{ item.7 }}"
   with_items:        
   - "{{ ipfs }}"
   ignore_errors: true
