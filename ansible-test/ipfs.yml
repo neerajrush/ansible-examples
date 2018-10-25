@@ -17,7 +17,7 @@
   with_items:        
   - "{{ ipfs }}"
 
-- name: add-scc-to-use {{ item.5 }} service acc
+- name: add-scc-to-user {{ item.5 }} service-account
   command: oc adm policy add-scc-to-user privileged system:serviceaccount:ipfs-sa:router-{{ item.5 }} 
   with_items:
   - "{{ ipfs }}"
