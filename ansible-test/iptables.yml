@@ -1,0 +1,25 @@
+- hosts: localhost
+  tasks:
+  - debug:
+      msg: "System has uuid {{ ansible_product_uuid }}"
+
+  - name: Iterate over worker node
+    debug: var=item
+    with_items: "{{ scalable_origin_so_nodes_with_minio_labels | from_yaml }}"
+
+  - name: scalable origin worker nodes | get minio iptables rules
+    shell: /sbin/iptables -L OS_FIREWALL_ALLOW -n --line-numbers
+    register: iptablesrules
+    sudo: true
+    with_items: "{{ scalable_origin_so_nodes_with_minio_labels }}"
+
+  - name: scalable origin worker nodes | set minio iptables rules
+    command: /sbin/iptables -A OS_FIREWALL_ALLOW -p tcp --dport 9000 -j ACCEPT -m comment --comment "minio"
+    sudo: true
+    when:
+    - iptablesrules.stdout.find("minio") == -1
+    with_items: "{{ scalable_origin_so_nodes_with_minio_labels }}"
+
+  - name: save iptables
+    command: iptables-save
+    sudo: true
