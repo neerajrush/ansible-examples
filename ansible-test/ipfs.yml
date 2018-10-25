@@ -5,7 +5,7 @@
   register: command_result
   changed_when: "'\" labeled' in command_result.stdout"
 
-- name: add-scc-to-use ipfs
+- name: add-scc-to-user ipfs
   command: "{{ item }}"
   with_items:        
   - oc adm policy add-scc-to-user hostnetwork -z ipfs
