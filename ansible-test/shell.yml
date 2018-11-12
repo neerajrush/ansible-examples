@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  tasks:
+  - debug:
+      msg: "System has uuid {{ ansible_product_uuid }}"
+
+  - name: Iterate over worker node
+    debug: var=item
+    with_items: "{{ worker_nodes_with_labels | from_yaml }}"
+
+  - name: worker nodes | get current date & time
+    shell: "date"
+    register: date_output
+    sudo: true
+    with_items: "{{ worker_nodes_with_labels }}"
+
+  - debug:
+      var: date_output.results[0].stdout
+    with_items: "{{ worker_nodes_with_labels }}"
