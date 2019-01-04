@@ -1,0 +1,76 @@
+---
+- name: Create an instance
+  hosts: all
+  gather_facts: no
+
+  tasks:
+   - name: create a disk
+     gcp_compute_disk:
+         name: 'test-gcp-disk-instance'
+         size_gb: 10
+         source_image: "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-9-stretch-v20181210"
+         zone: "{{ zone }}"
+         project: "{{ project }}"
+         auth_kind: "{{ auth_kind }}"
+         service_account_file: "{{ credentials_file }}"
+         scopes:
+           - https://www.googleapis.com/auth/compute
+         state: present
+     register: disk
+
+   - name: create a network
+     gcp_compute_network:
+         name: 'network-instance'
+         project: "{{ project }}"
+         auth_kind: "{{ auth_kind }}"
+         service_account_file: "{{ credentials_file }}"
+         scopes:
+           - https://www.googleapis.com/auth/compute
+         state: present
+     register: network
+
+   - name: create a address
+     gcp_compute_address:
+         name: 'address-instance'
+         region: "{{ region }}"
+         project: "{{ project }}"
+         auth_kind: "{{ auth_kind }}"
+         service_account_file: "{{ credentials_file }}"
+         scopes:
+           - https://www.googleapis.com/auth/compute
+         state: present
+     register: address
+
+   - name: create a instance
+     gcp_compute_instance:
+         name: test-gcp-instance
+         zone: "{{ zone }}"
+         project: "{{ project }}"
+         machine_type: "{{ machine_type }}"
+         disks:
+           - auto_delete: true
+             boot: true
+             source: "{{ disk }}"
+         network_interfaces:
+             - network: "{{ network }}"
+               access_configs:
+                 - name: 'External NAT'
+                   nat_ip: "{{ address }}"
+                   type: 'ONE_TO_ONE_NAT'
+         metadata: "{{ metadata }}"
+         auth_kind: "{{ auth_kind }}"
+         service_account_file: "{{ credentials_file }}"
+         scopes:
+           - https://www.googleapis.com/auth/compute
+         state: present
+     register: instance
+
+   - debug:
+       msg: "{{ instance.networkInterfaces[0].accessConfigs[0].natIP }}"
+
+   - name: Wait for SSH to come up
+     wait_for: host={{ instance.networkInterfaces[0].accessConfigs[0].natIP }} delay=2 timeout=10
+     register: result
+
+   - debug:
+       msg: "{{ result }}"
