@@ -5,7 +5,8 @@ all:
      ansible_connection: local
      ansible_python_interpreter: python3
      project: test-gcp-instance
-     instance_name: test-gcp 
+     instance_name: test-gcp
+     region: us-west1
      zone: us-west1-b
      machine_type: n1-standard-1
      auth_kind: serviceaccount
